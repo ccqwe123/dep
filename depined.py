@@ -10,8 +10,8 @@ KEEP_ALIVE_INTERVAL = 3  # in seconds
 CHECK_BROWSER_STATE_INTERVAL = 30  # in seconds
 API_URL = "https://api.depined.org/api/user/widget-connect"
 
-token = ""  # Replace with a function to retrieve the token dynamically
-connection_state = True  # Mocking the state from a database or cache
+token = input('Please Enter your TOKEN: ')
+connection_state = True
 
 user_agent = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
@@ -24,7 +24,7 @@ scraper = cloudscraper.create_scraper()
 
 async def keep_alive():
     while True:
-        logger.info("Sending keep-alive ping")
+        logger.info("Sending ping")
         await asyncio.sleep(KEEP_ALIVE_INTERVAL)
 
 async def poll_api():
@@ -45,13 +45,12 @@ async def poll_api():
             payload = {"connected": True}
             logger.info(f"Sending request payload: {json.dumps(payload)}")
             response = scraper.post(API_URL, headers=headers, json=payload)
-            logger.info(f"Sent POST request to {API_URL}")
             logger.info(f"Response Status: {response.status_code}")
             response_text = response.text
             if response.status_code == 200:
                 try:
                     data = response.json()
-                    logger.info(f"API response: {data}")
+                    logger.info(f"Ping Successful!")
                 except json.JSONDecodeError:
                     logger.warning(f"Failed to parse JSON response: {response_text}")
             else:
@@ -65,14 +64,14 @@ async def check_browser_state():
     while True:
         logger.info("Checking browser state...")
         if connection_state:
-            logger.info("Browser is active, continuing polling")
+            logger.info("Browser is active!")
         else:
-            logger.warning("No active windows, stopping polling")
+            logger.warning("No active windows!")
             break
         await asyncio.sleep(CHECK_BROWSER_STATE_INTERVAL)
 
 async def main():
-    logger.info("Starting bot...")
+    logger.info("Splekenesis Depined Bot")
     await asyncio.gather(
         poll_api(),
         keep_alive(),
