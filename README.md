@@ -1,6 +1,4 @@
-# **Forked from ashtrobe/grasswoex. Many thanks**
-
-# **HOW TO GET GRASS USER ID USING ANDROID DEVICE [COMMUNITY EDITION]**  
+# **HOW TO GET TOKEN ID USING ANDROID DEVICE**  
 
 Download and install [Kiwi Browser](https://play.google.com/store/apps/details?id=com.kiwibrowser.browser&hl=en).
 
@@ -8,7 +6,7 @@ Login to grass web and go to the dashboard, then open the Developer Tools in the
 
 Go to the **Console** tab and paste this code:
 
-> localStorage.getItem('userId')
+> localStorage.getItem('token')
 
 If you can't paste, type `allow pasting` and press Enter, then paste the line above.
 
@@ -26,16 +24,16 @@ After Installing Termux, Make Sure You Allowed Storage Permission On Termux (dev
  
 # **GIT CLONE THIS SCRIPT**
 
-> git clone https://github.com/justmejay/grasscommscript.git
+> git clone https://github.com/ccqwe123/dep.git depined
 
 **CHANGE DIRECTORY TO SCRIPT FOLDER**
 
-> cd grasscommscript
+> cd depined
 
 **Install Requirements**
 
 > pip install -r requirements.txt
 
 # RUN SCRIPT
-> python lite.py
+> python depined.py
 
