@@ -9,6 +9,7 @@ POLLING_INTERVAL = 90  # in seconds
 KEEP_ALIVE_INTERVAL = 3  # in seconds
 CHECK_BROWSER_STATE_INTERVAL = 30  # in seconds
 API_URL = "https://api.depined.org/api/user/widget-connect"
+EARNINGS_URL = "https://api.depined.org/api/stats/epoch-earnings"
 
 token = input('Please Enter your TOKEN: ')
 connection_state = True
@@ -22,14 +23,9 @@ random_user_agent = random.choice(user_agent)
 
 scraper = cloudscraper.create_scraper()
 
-async def keep_alive():
-    while True:
-        logger.info("Sending ping")
-        await asyncio.sleep(KEEP_ALIVE_INTERVAL)
-
-async def poll_api():
-    global connection_state
-    headers = {
+def get_headers():
+    """Generate headers for API requests."""
+    return {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {token}",
         "X-Requested-With": "XMLHttpRequest",
@@ -40,17 +36,40 @@ async def poll_api():
         "DNT": "1",
         "Connection": "keep-alive"
     }
+
+async def fetch_earnings():
+    """Fetch and display earnings from API."""
+    try:
+        response = scraper.get(EARNINGS_URL, headers=get_headers())
+        if response.status_code == 200:
+            data = response.json()
+            earnings = data.get("data", {}).get("earnings", 0)
+            formatted_earnings = f"{earnings:,.2f}"  # Format as 1,000.00
+            logger.info(f"📈 Earnings: ({formatted_earnings})")
+        else:
+            logger.warning(f"Failed to fetch earnings. Status: {response.status_code}")
+    except Exception as e:
+        logger.error(f"Error fetching earnings: {e}")
+
+async def keep_alive():
+    while True:
+        await asyncio.sleep(KEEP_ALIVE_INTERVAL)
+
+async def poll_api():
+    global connection_state
     while connection_state:
         try:
             payload = {"connected": True}
             logger.info(f"Sending request payload: {json.dumps(payload)}")
-            response = scraper.post(API_URL, headers=headers, json=payload)
+            response = scraper.post(API_URL, headers=get_headers(), json=payload)
             logger.info(f"Response Status: {response.status_code}")
             response_text = response.text
             if response.status_code == 200:
                 try:
                     data = response.json()
-                    logger.info(f"Ping Successful!")
+                    logger.info("✅ Ping Successful!")
+                    await fetch_earnings()
+                    logger.info("Sending ping...")
                 except json.JSONDecodeError:
                     logger.warning(f"Failed to parse JSON response: {response_text}")
             else:
@@ -62,12 +81,6 @@ async def poll_api():
 async def check_browser_state():
     global connection_state
     while True:
-        logger.info("Checking browser state...")
-        if connection_state:
-            logger.info("Browser is active!")
-        else:
-            logger.warning("No active windows!")
-            break
         await asyncio.sleep(CHECK_BROWSER_STATE_INTERVAL)
 
 async def main():
